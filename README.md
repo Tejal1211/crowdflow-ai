@@ -226,6 +226,77 @@ gcloud run deploy crowdflow-api \
 
 ---
 
+## ✅ Testing
+
+This project includes automated frontend testing using Vitest, React Testing Library, and jsdom.
+
+Tests cover:
+
+* App rendering
+* UI/component load checks
+* Basic route validation
+
+Run tests locally:
+
+```bash
+npm run test
+```
+
+---
+
+## ♿ Accessibility
+
+CrowdFlow AI follows accessibility best practices:
+
+* Semantic HTML (`header`, `main`, `nav`, `section`)
+* ARIA labels on buttons and inputs
+* Keyboard-friendly navigation
+* Responsive mobile-friendly UI
+* Readable layout and contrast
+
+---
+
+## 🔒 Security
+
+Security features implemented:
+
+* Environment variables for Firebase/API keys
+* `.env` excluded using `.gitignore`
+* Firebase Authentication
+* Protected routes
+* Input validation
+* Backend CORS configuration
+
+---
+
+## ⚡ Efficiency & Performance
+
+Built for performance and scalability:
+
+* Vite for fast builds
+* Reusable React components
+* Optimized frontend bundle
+* FastAPI async backend
+* Cloud Run autoscaling deployment
+
+---
+
+## ☁️ Google Services Used
+
+* Google Cloud Run
+* Google Cloud Build
+* Firebase Authentication
+* Firebase Firestore
+* Gemini API
+
+---
+
+## 🚀 Deployment Links
+
+* Backend: https://crowdflow-api-310680027900.asia-south1.run.app
+* GitHub Repo: https://github.com/Tejal1211/crowdflow-ai
+
+
 ## 📄 License
 
 MIT © 2025 CrowdFlow AI
