@@ -9,6 +9,8 @@ import {
 import { TrendingUp, Users, Clock, Star, Download } from 'lucide-react';
 import AppLayout from '../components/layout/AppLayout';
 import { generateChartData, generateZoneOccupancy } from '../hooks/useLiveData';
+import { analytics } from '../lib/firebase';
+import { logEvent } from 'firebase/analytics';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
@@ -47,6 +49,15 @@ export default function Analytics() {
   const [satisfactionData, setSatisfactionData] = useState([]);
 
   useEffect(() => {
+    if (analytics) {
+      logEvent(analytics, 'page_view', {
+        page_title: 'Analytics Dashboard',
+        page_location: window.location.href
+      });
+    }
+  }, []);
+
+  useEffect(() => {
     setVisitorData(generateChartData());
     setZoneData(generateZoneOccupancy());
     setSatisfactionData([
@@ -71,8 +82,40 @@ export default function Analytics() {
     { label: 'Fan Satisfaction', value: '91%', trend: '+3% vs last event', icon: Star, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
 
+  const handleDownloadReport = () => {
+    if (analytics) logEvent(analytics, 'analytics_report_download');
+    // Simulate download
+    const data = {
+      visitorData,
+      zoneData,
+      satisfactionData,
+      generatedAt: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `crowdflow-analytics-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AppLayout title="Analytics">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="text-gray-600 mt-1">Real-time crowd flow insights and performance metrics</p>
+        </div>
+        <button
+          onClick={handleDownloadReport}
+          className="btn-primary flex items-center gap-2 px-4 py-2"
+        >
+          <Download className="w-4 h-4" />
+          Download Report
+        </button>
+      </div>
+
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {kpis.map(({ label, value, trend, icon: Icon, color, bg }, i) => (

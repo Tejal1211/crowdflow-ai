@@ -1,15 +1,20 @@
 // src/pages/UserDashboard.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   UtensilsCrossed, MapPin, Navigation2, AlertTriangle, Phone,
-  Clock, Users, CheckCircle, XCircle, ArrowRight
+  Clock, Users, CheckCircle, XCircle, ArrowRight, LogOut, User,
+  Upload, Camera
 } from 'lucide-react';
 import AppLayout from '../components/layout/AppLayout';
 import CrowdHeatmap from '../components/charts/CrowdHeatmap';
 import GateWaitTimes from '../components/charts/GateWaitTimes';
 import AlertFeed from '../components/ui/AlertFeed';
 import { useLiveData } from '../hooks/useLiveData';
+import { useAuth } from '../lib/AuthContext';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage, analytics } from '../lib/firebase';
+import { logEvent } from 'firebase/analytics';
 
 function FoodStallCard({ stall, delay }) {
   const isBusy = stall.status === 'busy';
@@ -77,15 +82,130 @@ function RestroomCard({ room, delay }) {
 export default function UserDashboard() {
   const { data, refresh } = useLiveData(5000);
   const [sosActive, setSosActive] = useState(false);
+  const { user, logout } = useAuth();
+  const [uploading, setUploading] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(user?.profileImage || null);
+
+  useEffect(() => {
+    if (analytics) {
+      logEvent(analytics, 'page_view', {
+        page_title: 'User Dashboard',
+        page_location: window.location.href
+      });
+    }
+  }, []);
+
+  const handleRefresh = () => {
+    refresh();
+    if (analytics) logEvent(analytics, 'dashboard_refresh');
+  };
 
   const handleSOS = () => {
     setSosActive(true);
     setTimeout(() => setSosActive(false), 4000);
+    if (analytics) logEvent(analytics, 'sos_activated');
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    if (analytics) logEvent(analytics, 'user_logout');
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !user?.uid) return;
+
+    setUploading(true);
+    try {
+      const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+      setProfileImageUrl(downloadURL);
+      
+      // Update user data in Firestore with profile image URL
+      // Note: In a real app, you'd update the user document here
+      
+      if (analytics) logEvent(analytics, 'profile_image_uploaded');
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <AppLayout title="My Dashboard" onRefresh={refresh} lastUpdated={data.lastUpdated}>
+    <AppLayout title="My Dashboard" onRefresh={handleRefresh} lastUpdated={data.lastUpdated}>
       <div className="space-y-6">
+
+        {/* User Info Card */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-4">
+              <div className="relative">
+                {profileImageUrl ? (
+                  <img 
+                    src={profileImageUrl} 
+                    alt="Profile" 
+                    className="w-16 h-16 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="w-16 h-16 bg-primary-100 rounded-xl flex items-center justify-center">
+                    <User className="w-8 h-8 text-primary-600" />
+                  </div>
+                )}
+                <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-primary-700 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  {uploading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-4 h-4 text-white" />
+                  )}
+                </label>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-display font-semibold text-gray-900 text-lg">
+                  Welcome back, {user?.displayName || 'User'}!
+                </h3>
+                <p className="text-sm text-gray-500 mb-2">{user?.email}</p>
+                
+                {/* Firestore Data Display */}
+                <div className="space-y-1 text-sm">
+                  {user?.createdAt && (
+                    <p className="text-gray-600">
+                      <span className="font-medium">Member since:</span> {new Date(user.createdAt.toDate ? user.createdAt.toDate() : user.createdAt).toLocaleDateString()}
+                    </p>
+                  )}
+                  {user?.lastLogin && (
+                    <p className="text-gray-600">
+                      <span className="font-medium">Last login:</span> {new Date(user.lastLogin.toDate ? user.lastLogin.toDate() : user.lastLogin).toLocaleDateString()}
+                    </p>
+                  )}
+                  <p className="text-gray-600">
+                    <span className="font-medium">Account type:</span> {user?.isDemo ? 'Demo' : 'Premium'}
+                  </p>
+                </div>
+                
+                {user?.isDemo && <span className="inline-block mt-2 text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">Demo Mode</span>}
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="btn-secondary flex items-center gap-2 px-4 py-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
+          </div>
+        </motion.div>
 
         {/* Row 1: Heatmap + Gate */}
         <div className="grid lg:grid-cols-2 gap-6">
