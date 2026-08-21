@@ -19,7 +19,7 @@ A full-stack production-ready web application that improves physical event exper
 | 📈 Analytics Dashboard | Recharts-powered insights for operators |
 | 👨‍💼 Admin Dashboard | Full operational overview for stadium managers |
 
----
+
 
 ## 🏗️ Tech Stack
 
