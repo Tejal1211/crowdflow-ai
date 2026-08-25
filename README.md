@@ -44,7 +44,7 @@ A full-stack production-ready web application that improves physical event exper
 - Database → Firebase Firestore
 - Auth → Firebase Auth
 
----
+
 
 ## 📁 Project Structure
 
