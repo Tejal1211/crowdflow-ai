@@ -48,7 +48,6 @@ A full-stack production-ready web application that improves physical event exper
 
 ## 📁 Project Structure
 
-```
 crowdflow-ai/
 ├── frontend/
 │   ├── src/
