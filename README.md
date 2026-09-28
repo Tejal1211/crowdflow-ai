@@ -9,7 +9,6 @@ A full-stack production-ready web application that improves physical event exper
 ## 🚀 Features
 
 | Feature | Description |
-|---|---|
 | 🚪 Smart Gate Entry | AI-powered gate routing to minimize wait times |
 | 📊 Live Queue Monitoring | Real-time queue tracking across all facilities |
 | 🗺️ Seat Navigation | Turn-by-turn indoor navigation |
