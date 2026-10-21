@@ -4,8 +4,6 @@
 
 A full-stack production-ready web application that improves physical event experiences at large-scale sporting venues using real-time AI, crowd intelligence, and smart navigation.
 
-
-
 ## 🚀 Features
 
 | Feature | Description |
