@@ -1,5 +1,4 @@
 # CrowdFlow AI – Smart Stadium Experience Platform
-
 > **Smarter Stadium Experiences Powered by AI**
 A full-stack production-ready web application that improves physical event experiences at large-scale sporting venues using real-time AI, crowd intelligence, and smart navigation.
 
