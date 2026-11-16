@@ -16,7 +16,7 @@ A full-stack production-ready web application that improves physical event exper
 
 
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 **Frontend**
 - React 18 + Vite
